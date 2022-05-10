@@ -27,3 +27,12 @@ void Delete(wstring& _source, const wchar_t _Val)
 	}
 	return;
 }
+size_t wstrlen(const wchar_t* _String)
+{
+	size_t _result = 0;
+	while (*(_String + _result) != L'\0')
+	{
+		_result++;
+	}
+	return _result;
+}
