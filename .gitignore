@@ -30,3 +30,5 @@
 *.exe
 *.out
 *.app
+/.vs/nvlWalk/v17
+/Debug
