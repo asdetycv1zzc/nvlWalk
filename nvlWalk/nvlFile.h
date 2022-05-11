@@ -92,25 +92,28 @@ class nvlFile
 {
 private:
 	wchar_t* _base_address;
-	wchar_t* _init_address;
+	wchar_t* _init_filename;
 	std::wstring _init_content;
 	std::vector<std::wstring> _splited_init_content;
 
 	std::map<std::wstring, std::vector<std::wstring> > _file_content_table;
+	std::vector<std::wstring> _missing_filenames;
 	FileTable _file_table;
 
-	std::vector<LPCWSTR> _list;
+	//std::vector<LPCWSTR> _list;
 
 	void _FindBaseInit();
 	void _ReadInit();
 	void _ReadFile(const std::wstring& _address);
 
 	std::vector<std::wstring> _FindKSFile();
-	bool _IsKSFile(const std::wstring& _source);
+	bool _IsKSFile(const std::wstring& _address);
 	void _ReadKSFile();
 	bool _ExistKSFile(const std::wstring& _address);
 
-	std::wstring _NormalizeFileName(const std::wstring& _source);
+	std::vector<std::wstring> _ReadTJSFile(const std::wstring& _address);
+
+	std::wstring _NormalizeFileName(const std::wstring& _address);
 	std::wstring _FulfillFileName(const std::wstring& _source);
 	std::vector<std::wstring> _SplitScriptLines(const std::wstring& _source);
 	std::vector<std::wstring> _FindStorage(const std::vector<std::wstring>& _source);
