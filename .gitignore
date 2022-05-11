@@ -32,3 +32,5 @@
 *.app
 /.vs/nvlWalk/v17
 /Debug
+/.vs
+/Release

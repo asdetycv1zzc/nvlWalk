@@ -1,5 +1,0 @@
-﻿  main.cpp
-  nvlFile.cpp
-N:\Users\John\source\repos\nvlWalk\nvlWalk\nvlFile.cpp(8,1): error C2011: “nvlFile”:“class”类型重定义
-N:\Users\John\source\repos\nvlWalk\nvlWalk\nvlFile.h(6): message : 参见“nvlFile”的声明
-  正在生成代码...
