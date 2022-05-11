@@ -24,18 +24,12 @@
     <ClCompile Include="str_plugin.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="vec_plugin.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="nvlFile.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="str_plugin.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="vec_plugin.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

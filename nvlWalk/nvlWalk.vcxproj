@@ -142,12 +142,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="nvlFile.cpp" />
     <ClCompile Include="str_plugin.cpp" />
-    <ClCompile Include="vec_plugin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="nvlFile.h" />
     <ClInclude Include="str_plugin.h" />
-    <ClInclude Include="vec_plugin.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
