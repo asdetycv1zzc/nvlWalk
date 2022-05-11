@@ -5,15 +5,16 @@
 #include<Windows.h>
 #include"nvlFile.h"
 #include"str_plugin.h"
+#include"vec_plugin.h"
 #include <set>
 
 using namespace std;
 
 void nvlFile::_FindBaseInit()
 {
-	auto _size = wstrlen(_init_address);
+	auto _size = wstrlen(_init_filename);
 	size_t i = _size;
-	while (*(_init_address + i) != L'\\')
+	while (*(_init_filename + i) != L'\\')
 	{
 		i--;
 	}
@@ -21,7 +22,7 @@ void nvlFile::_FindBaseInit()
 	_base_address = new wchar_t[_pos + 2];
 	for (i = 0; i <= _pos + 1; i++)
 	{
-		_base_address[i] = _init_address[i];
+		_base_address[i] = _init_filename[i];
 	}
 	_base_address[_pos + 1] = L'\0';
 	return;
@@ -29,17 +30,17 @@ void nvlFile::_FindBaseInit()
 void nvlFile::_ReadInit()
 {
 	setlocale(LC_CTYPE, "");
-	fstream _f(_init_address, ios::in | ios::binary);
+	fstream _f(_init_filename, ios::in | ios::binary);
 	size_t i = 0;
-	HANDLE handle = CreateFile(_init_address, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	HANDLE handle = CreateFile(_init_filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 	_init_content.resize(GetFileSize(handle, NULL));
 	while (!_f.eof())
 	{
 		_f.read((char*)&_init_content[i], sizeof(wchar_t));
 		i++;
 	}
-	_file_content_table[_NormalizeFileName(_init_address)] = _SplitScriptLines(_init_content);
-	_file_table.setWalked(_NormalizeFileName(_init_address));
+	_file_content_table[_NormalizeFileName(_init_filename)] = _SplitScriptLines(_init_content);
+	_file_table.setWalked(_NormalizeFileName(_init_filename));
 	CloseHandle(handle);
 	return;
 }
@@ -49,7 +50,7 @@ void nvlFile::_ReadFile(const wstring& _address)
 	setlocale(LC_CTYPE, "");
 	fstream _f(_address, ios::in | ios::binary);
 	size_t i = 0;
-	HANDLE handle = CreateFile(_init_address, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	HANDLE handle = CreateFile(_init_filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 	if (GetLastError() != ERROR_SUCCESS) return;
 	wstring _buffer;
 	_buffer.resize(GetFileSize(handle, NULL));
@@ -86,16 +87,16 @@ bool nvlFile::_IsKSFile(const wstring& _source)
 void nvlFile::_ReadKSFile()
 {
 	FileTable _tmpTable = _file_table;
+	_tmpTable.deleteRepeat();
 	if (_tmpTable.isKSAllWalked()) 
 		return;
-	_tmpTable.deleteRepeat();
 	auto _size = _tmpTable._filenames.size();
 	for (size_t i = 0; i < _size; i++)
 	{
 		_tmpTable = _file_table;
+		_tmpTable.deleteRepeat();
 		if (_tmpTable.isKSAllWalked())
 			return;
-		_tmpTable.deleteRepeat();
 		if (_IsKSFile(_tmpTable._filenames[i]))
 		{
 			if (_ExistKSFile(_FulfillFileName(_tmpTable._filenames[i])))
@@ -107,6 +108,8 @@ void nvlFile::_ReadKSFile()
 			else
 			{
 				_file_table.setWalked(_NormalizeFileName(_tmpTable._filenames[i]));
+				_missing_filenames.push_back(_NormalizeFileName(_tmpTable._filenames[i]));
+				DeleteRepeat(_missing_filenames);
 			}
 		}
 	}
@@ -126,6 +129,7 @@ bool nvlFile::_ExistKSFile(const std::wstring& _address)
 wstring nvlFile::_FulfillFileName(const wstring& _source)
 {
 	if (!_base_address) return nullptr;
+	if (_source.find(_base_address) != wstring::npos) return _source;
 	return _base_address + _source;
 }
 wstring nvlFile::_NormalizeFileName(const wstring& _source)
@@ -185,10 +189,11 @@ vector<wstring> nvlFile::_FindStorage(const vector<wstring>& _source)
 }
 nvlFile::nvlFile(LPCWSTR _address)
 {
-	_init_address = const_cast<WCHAR*>(_address);
+	_init_filename = const_cast<WCHAR*>(_address);
 	_FindBaseInit();
 	_ReadInit();
 	_splited_init_content = _SplitScriptLines(_init_content);
 	_file_table.pushIn(_FindStorage(_splited_init_content));
 	_ReadKSFile();
+	wcout<<VectorToWstring<wstring>(_missing_filenames,L"\n");
 }
