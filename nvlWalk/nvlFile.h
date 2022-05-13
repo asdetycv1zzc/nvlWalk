@@ -6,6 +6,8 @@
 #include<Windows.h>
 #include<algorithm>
 #include<math.h>
+#include"vec_plugin.h"
+#include"MD5.h"
 
 struct FileTable
 {
@@ -43,7 +45,7 @@ struct FileTable
 		auto _size = _source.size();
 		for (size_t i = 0; i < _size; i++)
 		{
-			if(!_walked[_source[i]])
+			if (!_walked[_source[i]])
 				_walked[_source[i]] = false;
 		}
 		deleteRepeat();
@@ -81,6 +83,7 @@ struct FileTable
 		}
 		if (_tmpTable.size() == _filenames.size()) return;
 		auto _size = max(_tmpTable.size(), _filenames.size());
+		if (!_tmpTable.size() || !_filenames.size()) return;
 		for (size_t i = 0; i < _size; i++)
 		{
 			if (_tmpTable[i] != _filenames[i])
@@ -88,9 +91,35 @@ struct FileTable
 		}
 	}
 };
+struct tTJSArray
+{
+	std::wstring _source;
+	std::vector<tTJSArray> _sub_array;
+	std::vector<std::wstring> _elements;
+	void deleteRepeat()
+	{
+		//std::set<tTJSArray>_temp_sub_array(_sub_array.begin(), _sub_array.end());
+		std::set<std::wstring>_temp_elements(_elements.begin(), _elements.end());
+		//_sub_array.clear();
+		_elements.clear();
+		//_sub_array.assign(_temp_sub_array.begin(), _temp_sub_array.end());
+		_elements.assign(_temp_elements.begin(), _temp_elements.end());
+	}
+	void operator+=(const tTJSArray& _b)
+	{
+		_source += L'\n' + _b._source;
+		_sub_array.insert(_sub_array.end(), _b._sub_array.begin(), _b._sub_array.end());
+		_elements.insert(_elements.end(), _b._elements.begin(), _b._elements.end());
+		//deleteRepeat();
+		//DeleteRepeat(_sub_array);
+		//DeleteRepeat(_elements);
+	}
+};
+
 class nvlFile
 {
 private:
+	const size_t MAX_FILE_SIZE = 20 * 1024 * 1024;
 	wchar_t* _base_address;
 	wchar_t* _init_filename;
 	std::wstring _init_content;
@@ -100,23 +129,43 @@ private:
 	std::vector<std::wstring> _missing_filenames;
 	FileTable _file_table;
 
+	tTJSArray NULLTJSArray;
+
 	//std::vector<LPCWSTR> _list;
 
 	void _FindBaseInit();
 	void _ReadInit();
+	void _ReadFile(const std::wstring& _address, void* _Dest);
 	void _ReadFile(const std::wstring& _address);
 
 	std::vector<std::wstring> _FindKSFile();
 	bool _IsKSFile(const std::wstring& _address);
+	std::wstring _GuessKSFile(const std::wstring& _address);
 	void _ReadKSFile();
 	bool _ExistKSFile(const std::wstring& _address);
+	void _RebuildKSFileList(const std::wstring& _init_address_regex);
+	void _RenameKSFile(const std::wstring& _init_address);
 
-	std::vector<std::wstring> _ReadTJSFile(const std::wstring& _address);
+	tTJSArray _SortArrayFromTJSFile(const std::wstring& _address);
+	tTJSArray _SortArrayFromTJS(const std::wstring& _source);
+
+	std::wstring _CalculateMD5(const std::wstring& _address);
+	void _MatchMD5(const std::wstring& _address1, const std::wstring& _address2);
 
 	std::wstring _NormalizeFileName(const std::wstring& _address);
 	std::wstring _FulfillFileName(const std::wstring& _source);
 	std::vector<std::wstring> _SplitScriptLines(const std::wstring& _source);
 	std::vector<std::wstring> _FindStorage(const std::vector<std::wstring>& _source);
 public:
+	std::map<std::wstring, std::wstring> _hash_filename_table;
+	std::map<std::wstring, std::wstring> _MD5_known_filename_table;
+	std::map<std::wstring, std::wstring> _MD5_unknown_filename_table;
+
+	void MatchMD5(const std::wstring& _address1, const std::wstring& _address2);
+	void RenameKSFile(const std::wstring& _init_address);
+	std::wstring GuessKSFile(const std::wstring& _address);
+	void RebuildKSFileList(const std::wstring& _init_address);
+	tTJSArray SortArrayFromTJSFile(const std::wstring& _address);
+	tTJSArray SortArrayFromTJS(const std::wstring& _source);
 	nvlFile(LPCWSTR _address);
 };
